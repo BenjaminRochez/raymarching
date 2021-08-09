@@ -37388,8 +37388,8 @@ module.exports = function( THREE ) {
 	return OrbitControls;
 };
 
-},{}],"matcap/7.png":[function(require,module,exports) {
-module.exports = "/7.d90ffb25.png";
+},{}],"matcap/4.png":[function(require,module,exports) {
+module.exports = "/4.791e6325.png";
 },{}],"js/app.js":[function(require,module,exports) {
 "use strict";
 
@@ -37404,7 +37404,7 @@ var _fragment = _interopRequireDefault(require("./shader/fragment.glsl"));
 
 var _vertex = _interopRequireDefault(require("./shader/vertex.glsl"));
 
-var _ = _interopRequireDefault(require("../matcap/7.png"));
+var _ = _interopRequireDefault(require("../matcap/4.png"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37456,7 +37456,7 @@ var Sketch = /*#__PURE__*/function () {
       this.mouse = new THREE.Vector2();
       document.addEventListener('mousemove', function (e) {
         _this.mouse.x = e.pageX / _this.width - 0.5;
-        _this.mouse.y = -e.pageX / _this.height + 0.5;
+        _this.mouse.y = -e.pageY / _this.height + 0.5;
       });
     }
   }, {
@@ -37556,7 +37556,7 @@ exports.default = Sketch;
 new Sketch({
   dom: document.getElementById("container")
 });
-},{"three":"node_modules/three/build/three.module.js","./shader/fragment.glsl":"js/shader/fragment.glsl","./shader/vertex.glsl":"js/shader/vertex.glsl","three-orbit-controls":"node_modules/three-orbit-controls/index.js","../matcap/7.png":"matcap/7.png"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","./shader/fragment.glsl":"js/shader/fragment.glsl","./shader/vertex.glsl":"js/shader/vertex.glsl","three-orbit-controls":"node_modules/three-orbit-controls/index.js","../matcap/4.png":"matcap/4.png"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;

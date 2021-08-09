@@ -3,7 +3,7 @@ import fragment from "./shader/fragment.glsl";
 import vertex from "./shader/vertex.glsl";
 let OrbitControls = require("three-orbit-controls")(THREE);
 
-import matcap from '../matcap/7.png';
+import matcap from '../matcap/4.png';
 
 export default class Sketch {
   constructor(options) {
@@ -41,7 +41,7 @@ export default class Sketch {
     this.mouse = new THREE.Vector2();
     document.addEventListener('mousemove',  (e) =>{
       this.mouse.x = e.pageX/this.width - 0.5;
-      this.mouse.y = -e.pageX/this.height + 0.5;
+      this.mouse.y = -e.pageY/this.height + 0.5;
     })
   }
 

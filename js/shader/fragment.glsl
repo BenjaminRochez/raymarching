@@ -5,6 +5,7 @@ uniform vec4 resolution;
 varying vec2 vUv;
 float PI = 3.141592653589793238;
 uniform sampler2D matcap;
+uniform vec2 mouse;
 
 // ROTATE 3D function - https://gist.github.com/yiwenl/3f804e80d0930e34a0b33359259b556c
 mat4 rotationMatrix(vec3 axis, float angle) {
@@ -56,7 +57,7 @@ float smin( float a, float b, float k )
 float sdf(vec3 p){
 	vec3 p1 = rotate(p, vec3(1.), time/5.);
 	float box = sdBox(p1, vec3(0.3));
-	float sphere = sdSphere(p, 0.4);
+	float sphere = sdSphere(p - vec3(mouse, 0.), 0.2);
 	return smin(box, sphere, 0.1);
 }
 

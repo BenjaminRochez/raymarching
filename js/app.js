@@ -3,7 +3,7 @@ import fragment from "./shader/fragment.glsl";
 import vertex from "./shader/vertex.glsl";
 let OrbitControls = require("three-orbit-controls")(THREE);
 
-import matcap from '../matcap/4.png';
+import matcap from '../matcap/7.png';
 
 export default class Sketch {
   constructor(options) {
@@ -37,6 +37,14 @@ export default class Sketch {
     // this.settings();
   }
 
+  mouseEvents(){
+    this.mouse = new THREE.Vector2();
+    document.addEventListener('mousemove',  (e) =>{
+      this.mouse.x = e.pageX/this.width - 0.5;
+      this.mouse.y = -e.pageX/this.height + 0.5;
+    })
+  }
+
   settings() {
     let that = this;
     this.settings = {
@@ -66,6 +74,7 @@ export default class Sketch {
       },
       side: THREE.DoubleSide,
       uniforms: {
+        mouse: {value: new THREE.Vector2(0,0)},
         time: { type: "f", value: 0 },
         resolution: { type: "v4", value: new THREE.Vector4() },
         uvRate1: {
@@ -99,6 +108,9 @@ export default class Sketch {
   render() {
     if (!this.isPlaying) return;
     this.time += 0.05;
+    if(this.mouse){
+      this.material.uniforms.mouse.value = this.mouse;
+    }
     this.material.uniforms.time.value = this.time;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);

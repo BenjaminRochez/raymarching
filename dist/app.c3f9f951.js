@@ -36363,7 +36363,7 @@ if (typeof window !== 'undefined') {
   }
 }
 },{}],"js/shader/fragment.glsl":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nfloat PI = 3.141592653589793238;\nuniform sampler2D matcap;\n\n// ROTATE 3D function - https://gist.github.com/yiwenl/3f804e80d0930e34a0b33359259b556c\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, vec3 axis, float angle) {\n\tmat4 m = rotationMatrix(axis, angle);\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\n// Function matcap  - https://github.com/hughsk/matcap\n\nvec2 getmatcap(vec3 eye, vec3 normal) {\n  vec3 reflected = reflect(eye, normal);\n  float m = 2.8284271247461903 * sqrt( reflected.z+1.0 );\n  return reflected.xy / m + 0.5;\n}\n\n// Functions sphere creation - https://iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat sdSphere(vec3 p, float r){\n\treturn length(p)-r;\n}\n\n// Function BOX - https://iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat sdBox( vec3 p, vec3 b )\n{\n  vec3 q = abs(p) - b;\n  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);\n}\n\n// Polynomial minimum function - https://www.iquilezles.org/www/articles/smin/smin.htm\nfloat smin( float a, float b, float k )\n{\n    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\n\n// Function create object\nfloat sdf(vec3 p){\n\tvec3 p1 = rotate(p, vec3(1.), time/5.);\n\tfloat box = sdBox(p1, vec3(0.3));\n\tfloat sphere = sdSphere(p, 0.4);\n\treturn smin(box, sphere, 0.1);\n}\n\n// Normales vectors to have the 3D effect - https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm\nvec3 calcNormal( in vec3 p ) // for function f(p)\n{\n    const float eps = 0.0001; // or some other value\n    const vec2 h = vec2(eps,0);\n    return normalize( vec3(sdf(p+h.xyy) - sdf(p-h.xyy),\n                           sdf(p+h.yxy) - sdf(p-h.yxy),\n                           sdf(p+h.yyx) - sdf(p-h.yyx) ) );\n}\n\nvoid main()\t{\n\tvec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5); \n\n\t// Camera position\n\tvec3 camPos = vec3(0., 0., 2.);\n\n\t//Ray fired to the object\n\tvec3 ray = normalize(vec3( (vUv - vec2(0.5)) , -1));\n\t//vec3 ray = normalize(vec3( (vUv - vec2(0.5))*resolution.zw , -1));\n\tvec3 rayPos = camPos;\n\n\tfloat t = 0.;\n\tfloat tMax = 5.;\n\tfor(int i=0; i<256; ++i){\n\t\tvec3 pos = camPos + t*ray;\n\t\tfloat h = sdf(pos);\n\t\tif(h<0.0001 || t>tMax) break;\n\t\tt+=h;\n\t}\n\n\tvec3 color = vec3(0.);\n\tif(t<tMax){\n\t\tvec3 pos = camPos + t*ray; \n\t\tcolor = vec3(1.);\n\t\tvec3 normal = calcNormal(pos);\n\t\tcolor = normal;\n\t\tfloat diff = dot(vec3(1.), normal);\n\t\tvec2 matcapUV = getmatcap(ray, normal);\n\t\tcolor = vec3(diff);\n\t\tcolor = vec3(matcapUV, 0.); \n\t\tcolor = texture2D(matcap, matcapUV).rgb;\n\t}\n\n\tgl_FragColor = vec4(color,1.); \n}";
+module.exports = "#define GLSLIFY 1\nuniform float time;\nuniform float progress;\nuniform sampler2D texture1;\nuniform vec4 resolution;\nvarying vec2 vUv;\nfloat PI = 3.141592653589793238;\nuniform sampler2D matcap;\nuniform vec2 mouse;\n\n// ROTATE 3D function - https://gist.github.com/yiwenl/3f804e80d0930e34a0b33359259b556c\nmat4 rotationMatrix(vec3 axis, float angle) {\n    axis = normalize(axis);\n    float s = sin(angle);\n    float c = cos(angle);\n    float oc = 1.0 - c;\n    \n    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,\n                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,\n                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,\n                0.0,                                0.0,                                0.0,                                1.0);\n}\n\nvec3 rotate(vec3 v, vec3 axis, float angle) {\n\tmat4 m = rotationMatrix(axis, angle);\n\treturn (m * vec4(v, 1.0)).xyz;\n}\n\n// Function matcap  - https://github.com/hughsk/matcap\n\nvec2 getmatcap(vec3 eye, vec3 normal) {\n  vec3 reflected = reflect(eye, normal);\n  float m = 2.8284271247461903 * sqrt( reflected.z+1.0 );\n  return reflected.xy / m + 0.5;\n}\n\n// Functions sphere creation - https://iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat sdSphere(vec3 p, float r){\n\treturn length(p)-r;\n}\n\n// Function BOX - https://iquilezles.org/www/articles/distfunctions/distfunctions.htm\nfloat sdBox( vec3 p, vec3 b )\n{\n  vec3 q = abs(p) - b;\n  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);\n}\n\n// Polynomial minimum function - https://www.iquilezles.org/www/articles/smin/smin.htm\nfloat smin( float a, float b, float k )\n{\n    float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );\n    return mix( b, a, h ) - k*h*(1.0-h);\n}\n\n// Function create object\nfloat sdf(vec3 p){\n\tvec3 p1 = rotate(p, vec3(1.), time/5.);\n\tfloat box = sdBox(p1, vec3(0.3));\n\tfloat sphere = sdSphere(p - vec3(mouse, 0.), 0.2);\n\treturn smin(box, sphere, 0.1);\n}\n\n// Normales vectors to have the 3D effect - https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm\nvec3 calcNormal( in vec3 p ) // for function f(p)\n{\n    const float eps = 0.0001; // or some other value\n    const vec2 h = vec2(eps,0);\n    return normalize( vec3(sdf(p+h.xyy) - sdf(p-h.xyy),\n                           sdf(p+h.yxy) - sdf(p-h.yxy),\n                           sdf(p+h.yyx) - sdf(p-h.yyx) ) );\n}\n\nvoid main()\t{\n\tvec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5); \n\n\t// Camera position\n\tvec3 camPos = vec3(0., 0., 2.);\n\n\t//Ray fired to the object\n\tvec3 ray = normalize(vec3( (vUv - vec2(0.5)) , -1));\n\t//vec3 ray = normalize(vec3( (vUv - vec2(0.5))*resolution.zw , -1));\n\tvec3 rayPos = camPos;\n\n\tfloat t = 0.;\n\tfloat tMax = 5.;\n\tfor(int i=0; i<256; ++i){\n\t\tvec3 pos = camPos + t*ray;\n\t\tfloat h = sdf(pos);\n\t\tif(h<0.0001 || t>tMax) break;\n\t\tt+=h;\n\t}\n\n\tvec3 color = vec3(0.);\n\tif(t<tMax){\n\t\tvec3 pos = camPos + t*ray; \n\t\tcolor = vec3(1.);\n\t\tvec3 normal = calcNormal(pos);\n\t\tcolor = normal;\n\t\tfloat diff = dot(vec3(1.), normal);\n\t\tvec2 matcapUV = getmatcap(ray, normal);\n\t\tcolor = vec3(diff);\n\t\tcolor = vec3(matcapUV, 0.); \n\t\tcolor = texture2D(matcap, matcapUV).rgb;\n\t}\n\n\tgl_FragColor = vec4(color,1.); \n}";
 },{}],"js/shader/vertex.glsl":[function(require,module,exports) {
 module.exports = "#define GLSLIFY 1\nuniform float time;\nvarying vec2 vUv;\nvarying vec3 vPosition;\nuniform vec2 pixels;\nfloat PI = 3.141592653589793238;\nvoid main() {\n  vUv = uv;\n  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
 },{}],"node_modules/three-orbit-controls/index.js":[function(require,module,exports) {
@@ -37388,8 +37388,8 @@ module.exports = function( THREE ) {
 	return OrbitControls;
 };
 
-},{}],"matcap/4.png":[function(require,module,exports) {
-module.exports = "/4.791e6325.png";
+},{}],"matcap/7.png":[function(require,module,exports) {
+module.exports = "/7.d90ffb25.png";
 },{}],"js/app.js":[function(require,module,exports) {
 "use strict";
 
@@ -37404,7 +37404,7 @@ var _fragment = _interopRequireDefault(require("./shader/fragment.glsl"));
 
 var _vertex = _interopRequireDefault(require("./shader/vertex.glsl"));
 
-var _ = _interopRequireDefault(require("../matcap/4.png"));
+var _ = _interopRequireDefault(require("../matcap/7.png"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -37449,6 +37449,17 @@ var Sketch = /*#__PURE__*/function () {
   }
 
   _createClass(Sketch, [{
+    key: "mouseEvents",
+    value: function mouseEvents() {
+      var _this = this;
+
+      this.mouse = new THREE.Vector2();
+      document.addEventListener('mousemove', function (e) {
+        _this.mouse.x = e.pageX / _this.width - 0.5;
+        _this.mouse.y = -e.pageX / _this.height + 0.5;
+      });
+    }
+  }, {
     key: "settings",
     value: function settings() {
       var that = this;
@@ -37482,6 +37493,9 @@ var Sketch = /*#__PURE__*/function () {
         },
         side: THREE.DoubleSide,
         uniforms: {
+          mouse: {
+            value: new THREE.Vector2(0, 0)
+          },
           time: {
             type: "f",
             value: 0
@@ -37524,6 +37538,11 @@ var Sketch = /*#__PURE__*/function () {
     value: function render() {
       if (!this.isPlaying) return;
       this.time += 0.05;
+
+      if (this.mouse) {
+        this.material.uniforms.mouse.value = this.mouse;
+      }
+
       this.material.uniforms.time.value = this.time;
       requestAnimationFrame(this.render.bind(this));
       this.renderer.render(this.scene, this.camera);
@@ -37537,7 +37556,7 @@ exports.default = Sketch;
 new Sketch({
   dom: document.getElementById("container")
 });
-},{"three":"node_modules/three/build/three.module.js","./shader/fragment.glsl":"js/shader/fragment.glsl","./shader/vertex.glsl":"js/shader/vertex.glsl","three-orbit-controls":"node_modules/three-orbit-controls/index.js","../matcap/4.png":"matcap/4.png"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","./shader/fragment.glsl":"js/shader/fragment.glsl","./shader/vertex.glsl":"js/shader/vertex.glsl","three-orbit-controls":"node_modules/three-orbit-controls/index.js","../matcap/7.png":"matcap/7.png"}],"../../../../usr/local/lib/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -37565,7 +37584,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49940" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52142" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

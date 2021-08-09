@@ -57,8 +57,8 @@ float smin( float a, float b, float k )
 float sdf(vec3 p){
 	vec3 p1 = rotate(p, vec3(1.), time/5.);
 	float box = sdBox(p1, vec3(0.3));
-	float sphere = sdSphere(p - vec3(mouse, 0.), 0.2);
-	return smin(box, sphere, 0.1);
+	float sphere = sdSphere(p - vec3(mouse * 2., 0.), 0.2);
+	return smin(box, sphere, 0.5);
 }
 
 // Normales vectors to have the 3D effect - https://www.iquilezles.org/www/articles/normalsSDF/normalsSDF.htm

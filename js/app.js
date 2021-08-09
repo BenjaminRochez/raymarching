@@ -4,6 +4,7 @@ import vertex from "./shader/vertex.glsl";
 let OrbitControls = require("three-orbit-controls")(THREE);
 
 import matcap from '../matcap/4.png';
+import matcap1 from '../matcap/7.png';
 
 export default class Sketch {
   constructor(options) {
@@ -15,7 +16,7 @@ export default class Sketch {
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setClearColor(0xeeeeee, 1);
+    this.renderer.setClearColor(0x000000, 1);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
 
     this.container.appendChild(this.renderer.domElement);
@@ -42,6 +43,8 @@ export default class Sketch {
     document.addEventListener('mousemove',  (e) =>{
       this.mouse.x = e.pageX/this.width - 0.5;
       this.mouse.y = -e.pageY/this.height + 0.5;
+      console.log(this.mouse.x)
+      
     })
   }
 
@@ -111,6 +114,7 @@ export default class Sketch {
     if(this.mouse){
       this.material.uniforms.mouse.value = this.mouse;
     }
+   
     this.material.uniforms.time.value = this.time;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
